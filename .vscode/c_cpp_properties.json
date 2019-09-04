@@ -9,8 +9,7 @@
                 "/usr/include/**",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/src",
-                "/usr/include/gtk-2.0/**",
-                "/usr/local/include/cjson/*"
+                "/usr/include/gtk-2.0/**"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",

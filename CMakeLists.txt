@@ -17,7 +17,7 @@ include_directories(include)
 aux_source_directory(src DIR_SRCS)
 
 
-find_package(Threads)
+find_package(Threads REQUIRED)
 find_package(GTK2 2.6 REQUIRED gtk)
 
 if (GTK2_FOUND)
@@ -35,7 +35,7 @@ endif()
 add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
 #7.add link library，添加可执行文件所需要的库，比如我们用到了libm.so（命名规则：lib+name+.so），就添加该库的名称
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GTK2_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GTK2_LIBRARIES} libpthread.so cjson.so)
 
 
 
