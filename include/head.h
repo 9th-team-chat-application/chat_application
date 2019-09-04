@@ -4,7 +4,7 @@
  * @File name: 
  * @Version: 
  * @Date: 2019-08-31 19:44:55 -0700
- * @LastEditTime: 2019-09-03 18:40:37 -0700
+ * @LastEditTime: 2019-09-04 10:12:43 -0700
  * @LastEditors: 
  * @Description: 这里是主头文件，包含了所有的库文件，全局变量声明，结构体声明等
  */
@@ -21,9 +21,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
-#include<string.h>  
-#include<errno.h>  
-#include<sys/types.h>   
+#include <string.h>  
+#include <errno.h>  
+#include <sys/types.h>   
 #include <pthread.h>
 #include <gdk/gdkkeysyms.h>
 #include <sys/types.h>
@@ -58,7 +58,7 @@ typedef struct QueueRecord
 GtkWidget *FriendWindow;
 GtkWidget *LoadingWindow;
 Queue Q;
-
+char *local;
 
 #endif
 

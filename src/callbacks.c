@@ -4,7 +4,7 @@
  * @File name: 
  * @Version: 
  * @Date: 2019-08-31 19:45:05 -0700
- * @LastEditTime: 2019-09-04 05:31:24 -0700
+ * @LastEditTime: 2019-09-04 14:40:03 -0700
  * @LastEditors: 
  * @Description: 
  */
@@ -12,6 +12,55 @@
 #include "interface.h"
 #include "mainprogram.h"
 
+/**
+ * @Author: hhz
+ * @Description: 
+ * @Param: 
+ * @Return: 
+ * @Throw: 
+ */
+void SubmitInfo(GtkWidget *button, gpointer window,GtkWidget *data)
+{
+    gtk_widget_destroy(data);
+}
+
+/**
+ * @Author: 邓方晴
+ * @Description: 在输入为空的情况下点击发送键
+ * @Param: 
+ * @Return: 
+ * @Throw: 
+ */
+void on_input_null()
+{
+    GtkWidget *dialog;
+    dialog = gtk_message_dialog_new(NULL,
+                                    GTK_DIALOG_DESTROY_WITH_PARENT,
+                                    GTK_MESSAGE_INFO,
+                                    GTK_BUTTONS_OK,
+                                    "发送内容不能为空！", "title");
+    gtk_window_set_title(GTK_WINDOW(dialog), "提示");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+static char nowtime[30];//全局变量，显示当前时间
+/**
+ * @Author: 邓方晴
+ * @Description: 获得当前系统时间，返回字符串
+ * @Param: 
+ * @Return: 
+ * @Throw: 
+ */
+void getThisTime()
+{
+    time_t now ;
+    struct tm *l_time;
+    now = time((time_t *)NULL);
+    l_time = localtime(&now); //取本地时间
+    memset(nowtime,'\0',sizeof(nowtime));
+    sprintf(nowtime,"%d/%d/%d  %d:%d:%d",l_time->tm_year+1900,l_time->tm_mon+1,l_time->tm_mday,l_time->tm_hour,l_time->tm_min,l_time->tm_sec);
+    g_printf("%s\n",nowtime);
+}
 /**
  * @Author: hhz
  * @Description: 
@@ -34,7 +83,7 @@ void ClickedGroup(GtkWidget *button, gpointer window)
  */
 void InsertEmoji(GtkWidget *widget, GdkEventButton *event, Emoji *sinfo)
 {
-
+    gchar* SendMessage;
     char head[30] = "./bin/sticker";
     char tail[10] = ".gif";
     for (int i = 0; i < 3; i++)
@@ -46,12 +95,13 @@ void InsertEmoji(GtkWidget *widget, GdkEventButton *event, Emoji *sinfo)
     GtkTextIter end;
     //获取缓冲区的尾部
     gtk_text_buffer_get_end_iter(sinfo->view_buffer, &end);
-
+    
     GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(head, NULL);
     gtk_text_buffer_insert_pixbuf(sinfo->view_buffer, &end, pixbuf);
+
     //向缓冲区插入数据
     // gtk_text_buffer_insert(sinfo->view_buffer,&end,sinfo->str,-1);
-
+    //gtk_text_buffer_insert(sinfo->view_buffer,&end,sinfo->str,-1);
     GtkWidget *sticker_window = sinfo->sticker_window;
     Emoji **p = sinfo->spointer;
     int i;
@@ -255,6 +305,7 @@ void EditInformation(GtkMenuItem *menuitem, gpointer data)
     GtkWidget *window;
     GtkWidget *label1, *label2, *label4;
     GtkWidget *box1, *box2, *box3, *box4;
+    GtkWidget *button;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "修改个人资料");
@@ -283,9 +334,14 @@ void EditInformation(GtkMenuItem *menuitem, gpointer data)
     gtk_box_pack_start(GTK_BOX(box4), label4, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box4), entry4, FALSE, FALSE, 5);
 
+    button=gtk_button_new_with_label("确定");
+    g_signal_connect(G_OBJECT(button), "clicked",
+                     G_CALLBACK(SubmitInfo), window);
+
     gtk_box_pack_start(GTK_BOX(box3), box1, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box3), box2, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box3), box4, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(box3), button, FALSE, FALSE, 5);
     gtk_widget_show_all(window);
 }
 /**
@@ -313,29 +369,66 @@ gboolean isconnected = TRUE;
 void on_send(GtkButton *button, FromToWin *ftw)
 {
     gchar *message;
+    gchar *username="DengFangqing2746 ";
+    gchar *friendname="HeHezi2116";
     GtkTextIter start, end, show;
+    gchar *report; //report是最终向服务器发送对字符串
+    //TODO:report需要有全局或局部变量外部接应
+
+    
+    // username = my_string_new("DengFangqing2746 ");
+    // friendname = my_string_new("HeHezi2116  ");
+    //TODO:此处应有措施传递用户名
+
     if (isconnected == FALSE)
         return;
+    getThisTime(); //获取发送信息的时间
+
     gtk_text_buffer_get_bounds(ftw->from, &start, &end);
-    gtk_text_buffer_get_start_iter(ftw->to, &show);
-
-    message = gtk_text_buffer_get_text(ftw->from, &start, &end, FALSE);
-
+    //TODO:发表情功能加入后，如何提示输出为空
+    //message = gtk_text_buffer_get_text(ftw->from,&start,&end,FALSE);//获取输入框内文字
+    message = gtk_text_buffer_get_slice(ftw->from, &start, &end, TRUE);
+    //printf("%s",message);
+    if (strlen(message) == 0 || message == NULL) //当输入空字符时弹出提示对话框
+    {
+        on_input_null();
+        return;
+    }
     gtk_text_buffer_get_end_iter(ftw->to, &show);
-    gtk_text_buffer_insert(ftw->to, &show, "server:  ", -1);
+    /////////////////////聊天窗口界面显示/////////////////////////////
+    gtk_text_buffer_insert_with_tags_by_name(ftw->to, &show, username, -1,"AutoWrap","GREEN",NULL);
     gtk_text_buffer_get_end_iter(ftw->to, &show);
+    gtk_text_buffer_insert_with_tags_by_name(ftw->to, &show, nowtime, -1,"AutoWrap","GREEN",NULL);
     gtk_text_buffer_insert(ftw->to, &show, "\n", -1);
     gtk_text_buffer_get_end_iter(ftw->to, &show);
 
-    gtk_text_buffer_insert(ftw->to, &show, message, -1);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(ftw->show), TRUE);  //开启编辑权限
+    gtk_text_buffer_insert_range(ftw->to, &show, &start, &end);  //含有pixbuf显示
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(ftw->show), FALSE); //关闭编辑权限
     gtk_text_buffer_get_end_iter(ftw->to, &show);
     gtk_text_buffer_insert(ftw->to, &show, "\n", -1);
 
-    gtk_text_buffer_insert_range(ftw->to, &show, &start, &end);
-    //  gtk_text_buffer_insert(ftw->to,&show,"\n",-1);
+    gtk_text_buffer_set_text(ftw->from, "", 1); //清空输入框
+    ////////////////////////合成发送信息/////////////////////////////
+    //TODO:如何将表情包和文件发送信息转成字符发送
+    // report = my_string_new("~$Username: ");
+    // report = my_string_add(report, username);
+    // report = my_string_add(report, "\n~$Friendname: ");
+    // report = my_string_add(report, friendname);
+    // report = my_string_add(report, "\n~$Time: ");
+    // report = my_string_add(report, nowtime);
+    // report = my_string_add(report, "\n~$Message: ");
+    // report = my_string_add(report, message); //FIXME:
+    // report = my_string_add(report, "\nEND \n");
 
-    gtk_text_buffer_set_text(ftw->from, "", 1);
-    g_thread_create((GThreadFunc)auto_update_thread, NULL, FALSE, NULL);
+    gtk_text_buffer_get_end_iter(ftw->to, &show);
+    gtk_text_buffer_insert(ftw->to, &show, report, -1); //在聊天界面显示，用于验证合成是否成功
+    // cJSON* data = cJSON_CreateObject();
+    //local,ftw->target,nowtime;
+    // encodeUserMessage
+
+    // sendTextToServer(data);
+    //g_thread_create((GThreadFunc)auto_update_thread, NULL, FALSE, NULL);
 }
 
 /**
@@ -348,11 +441,26 @@ void on_send(GtkButton *button, FromToWin *ftw)
 void CheckMessageLog(GtkWidget *widget, GdkEvent *event)
 {
     GtkWidget *window;
+    TextView messagelog;
+    GtkWidget *scroll;
+    GtkTextIter end;
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "历史记录");
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 300);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+
+    scroll = gtk_scrolled_window_new(NULL,NULL);
+    gtk_container_add(GTK_CONTAINER(window), scroll);
+
+    messagelog.view = gtk_text_view_new();
+    messagelog.view_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(messagelog.view));
+    gtk_text_view_set_editable(messagelog.view,FALSE);
+    gtk_text_buffer_get_end_iter(messagelog.view_buffer,&end);//设置历史记录不可以被编辑
+    gtk_text_buffer_insert(messagelog.view_buffer,&end,"显示消息记录",-1);
+
+    gtk_container_add(GTK_CONTAINER(scroll),messagelog.view);
+
     gtk_widget_show_all(window);
 }
 
@@ -508,4 +616,44 @@ void EditBackground(GtkMenuItem *menuitem, gpointer data)
     gtk_table_attach_defaults(GTK_TABLE(table), sbox6, 2, 3, 1, 2);
 
     gtk_widget_show_all(background_window);
+}
+
+/**
+ * @Author: 王可欣
+ * @Description: 
+ * @Param: 
+ * @Return: 
+ */
+
+int getTime()
+{
+    time_t now;
+    struct tm *l_time;
+    now = time((time_t *)NULL);
+    l_time = localtime(&now); //取本地时间
+    return l_time->tm_sec;
+}
+
+/**
+ * @Author:何禾子
+ * @Description:  实现窗口抖动
+ * @Param: 
+ * @Return: 
+ */
+void SwitchWindow(GtkMenuItem *menuitem, gpointer data, gpointer window)
+{
+    gint x, y, flag = 0;
+    gtk_window_get_position(window, &x, &y);
+  
+    x = x + 50;
+    y = y + 50;
+    gtk_window_move(window, x, y);
+    
+    sleep(1);
+
+    x = x - 40;
+    y = y - 40;
+    gtk_window_move(window, x, y);
+    
+
 }

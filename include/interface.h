@@ -4,7 +4,7 @@
  * @File name: 
  * @Version: 
  * @Date: 2019-08-31 09:02:24 -0700
- * @LastEditTime: 2019-09-04 09:04:26 -0700
+ * @LastEditTime: 2019-09-04 11:26:04 -0700
  * @LastEditors: 
  * @Description: 
  */
@@ -16,19 +16,22 @@
 ///////////////////////////结构体定义区///////////////////////
 
 
+typedef struct TalkInfo
+{
+    char *ID;
+    char *IP;
+    int state;
+}TalkInfo;
 
+//聊天窗口
 typedef struct from_to_windows{
     GtkTextBuffer *from;
     GtkTextBuffer *to;
-    int type;
+    GtkTextView *edit;
+    GtkTextView *show;
+    char *target;
 }FromToWin;
 
-typedef struct _WinAppear
-{
-    gchar* title;
-    gint width,height;
-    GtkWindowPosition position;
-}WINAPPEAR;
 
 
 typedef struct SelfInfo{

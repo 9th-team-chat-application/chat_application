@@ -4,7 +4,7 @@
  * @File name: 
  * @Version: 
  * @Date: 2019-08-31 06:01:47 -0700
- * @LastEditTime: 2019-09-04 05:31:26 -0700
+ * @LastEditTime: 2019-09-04 12:53:37 -0700
  * @LastEditors: Please set LastEditors
  */
 #ifndef __CALLBACKS_H__
@@ -24,5 +24,6 @@ void on_ok (GtkButton* button, gpointer data);
 void EditInformation(GtkMenuItem *menuitem, gpointer data);
 void EditBackground(GtkMenuItem *menuitem, gpointer data);
 void ClickedGroup(GtkWidget *button, gpointer window);
+void SwitchWindow(GtkMenuItem *menuitem, gpointer data, gpointer window);
 #endif
 
