@@ -4,7 +4,7 @@
  * @File name: 
  * @Version: 
  * @Date: 2019-09-04 22:04:19 +0800
- * @LastEditTime: 2019-09-04 23:08:44 +0800
+ * @LastEditTime: 2019-09-05 00:14:55 +0800
  * @LastEditors: 
  * @Description: 
  */
@@ -17,6 +17,8 @@
  * @Return: 
  * @Throw: 
  */
+
+MsgId = -1;
 void QueueInit()
 {
     MsgId = msgget((key_t)6666, 0666 | IPC_CREAT);
@@ -55,7 +57,7 @@ void PushMessage(char Msg[])
 void GetMessage(char Msg[])
 {
     Send_Req MSG;
-    if (msgrcv(MsgId, (void *)&MSG, Size, 0, 0) == -1) //此处第四个参数用Id(>0)则选择描述符为Id的消息，为0则选择第一条消息。
+    if (msgrcv(MsgId, (void *)&MSG, BUFFER_SIZE, 0, 0) == -1) //此处第四个参数用Id(>0)则选择描述符为Id的消息，为0则选择第一条消息。
     {
         perror("Get Message Error");
     }
